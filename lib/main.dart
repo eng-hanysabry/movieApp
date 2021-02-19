@@ -1,10 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_281/screens/SignIn.dart';
 import 'package:flutter_application_281/screens/Signup.dart';
-import 'package:flutter_application_281/screens/home.dart';
 
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyHomePage());
 }
 
@@ -17,7 +19,7 @@ class MyHomePage extends StatelessWidget {
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: SignUp(),
+      home: SignIn(),
     );
   }
 }

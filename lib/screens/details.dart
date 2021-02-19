@@ -14,6 +14,8 @@ class Details extends StatefulWidget {
 class _DetailsState extends State<Details> {
   @override
   Widget build(BuildContext context) {
+        double mHeight = MediaQuery.of(context).size.height;
+    double mWidth = MediaQuery.of(context).size.width;
     Movie movie = ModalRoute.of(context).settings.arguments;
     return Scaffold(
         backgroundColor: Colors.white,
