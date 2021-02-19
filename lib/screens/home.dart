@@ -19,6 +19,8 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
   List<Movie> favMovies = [];
   List<int> idList = [];
   DbHelper dbHelper;
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   initState() {
     tabController = TabController(length: 2, initialIndex: 0, vsync: this);
@@ -32,40 +34,35 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
   }
 
   Widget build(BuildContext context) {
+        double mHeight = MediaQuery.of(context).size.height;
+    double mWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.white,
+      drawer: Drawer(),
       appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.menu,color: Colors.white,size: 30,), onPressed: (){
+          _scaffoldKey.currentState.openDrawer();
+        }),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          "Movies App",
-          style: TextStyle(color: Colors.black, fontSize: 30),
-        ),
-        actions: [
-          FlatButton(onPressed: (){
-            showFavourite(favMovies);
-          }, child: Text("Favourite", style: TextStyle(color: Colors.black, fontSize: 16),))
-        ],
+        backgroundColor: Colors.blueAccent,
+        elevation: 0, 
         bottom: PreferredSize(
-          preferredSize: Size(0.0, 30.0),
-          child: TabBar(
+          preferredSize: Size(0.0, 20.0),
+          child: TabBar(indicatorPadding: EdgeInsets.all(10),
             tabs: [
-              Text(
+              Padding(padding: EdgeInsets.all(5),child: Text(
                 "Top_Rated",
-                style: TextStyle(color: Colors.grey[700], fontSize: 20),
-              ),
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),),
               Text(
                 "Popular",
-                style: TextStyle(color: Colors.grey[700], fontSize: 20),
+                style: TextStyle(color: Colors.white, fontSize: 20),
               )
             ],
-            indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(
-                width: 3,
-                color: Colors.blueAccent,
-              ),
-            ),
+            indicator: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
+                        border: Border.all(color: Colors.redAccent, width: 2)),
             controller: tabController,
           ),
         ),
@@ -111,7 +108,7 @@ class _MyAppState extends State<MyApp> with TickerProviderStateMixin {
                     child: Container(
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15.0),
-                          border: Border.all(width: .6, color: Colors.black)),
+                          border: Border.all(width: .6, color: Colors.black),color:Colors.grey[300].withOpacity(.6) ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [

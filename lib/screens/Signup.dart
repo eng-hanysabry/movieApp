@@ -13,10 +13,19 @@ class SignUp extends StatefulWidget {
 class _SignUpState extends State<SignUp> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  TextEditingController nameControler = TextEditingController();
   TextEditingController emailControler = TextEditingController();
+  TextEditingController mobileControler = TextEditingController();
   TextEditingController passwordControler = TextEditingController();
-  ErrorText errorText1 = ErrorText(error: '');
+  TextEditingController conPassControler = TextEditingController();
+  final _textFieldKey=GlobalKey<FormFieldState<String>>();
+  ErrorText errorText1 = ErrorText(error: "");
   ErrorText errorText2 = ErrorText(error: "");
+  ErrorText errorText3 = ErrorText(error: "");
+  ErrorText errorText4 = ErrorText(error: "");
+  ErrorText errorText5 = ErrorText(error: "");
+  var imgpath;
+
   @override
   Widget build(BuildContext context) {
     double mHeight = MediaQuery.of(context).size.height;
@@ -29,35 +38,56 @@ class _SignUpState extends State<SignUp> {
         key: _formKey,
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage("assets/bkg.png"),
+            SizedBox(
+              height: 30,
             ),
+            Row(crossAxisAlignment: CrossAxisAlignment.start,mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(width: 50,),
+              CircleAvatar(
+              radius: 50,
+              backgroundImage: imgpath != null? AssetImage(imgpath):AssetImage("assets/person1.jpg"),
+            ),
+            IconButton(icon: Icon(Icons.linked_camera_outlined,color: Colors.black,size: 25,), onPressed: (){
+            _showDialog(context);
+              
+            })
+            ],),
             SizedBox(
               height: 20,
             ),
-            field(" your name", Icons.person, emailControler, false,
+            field(" your name", Icons.person, nameControler, false,
                 mHeight / 12, errorText1),
             SizedBox(
               height: 10,
             ),
-            field(" Email Adress", Icons.email, passwordControler, false,
+            field(" Email Adress", Icons.email, emailControler, false,
                 mHeight / 12, errorText2),
             SizedBox(
               height: 10,
             ),
-            field(" Mobile number", Icons.email, passwordControler, false,
-                mHeight / 12, errorText2),
+            field(" Mobile number", Icons.dialpad, mobileControler, false,
+                mHeight / 12, errorText3),
             SizedBox(
               height: 10,
             ),
-            field("Enter your password", Icons.email, passwordControler, false,
-                mHeight / 12, errorText2),
+            field("Enter your password", Icons.lock, passwordControler, true,
+                mHeight / 12, errorText4,key: _textFieldKey),
             SizedBox(
               height: 10,
             ),
-            field("Confirm password", Icons.email, passwordControler, false,
-                mHeight / 12, errorText2),
+            field("Confirm password", Icons.lock, conPassControler, true,
+                mHeight / 12, errorText5,fun: (value){
+                  if (value == "") {
+                    errorText5.error = "Empty Field Required";
+                  } else if(value != _textFieldKey.currentState.value){
+                    errorText5.error = "Password does not match";
+                  }else{
+                    errorText5.error="";
+                  }
+                  setState(() {});
+                  return null;
+                }),
             SizedBox(
               height: 10,
             ),
@@ -67,13 +97,17 @@ class _SignUpState extends State<SignUp> {
               height: mHeight / 12,
               child: RaisedButton(
                 onPressed: () {
-                  _formKey.currentState.validate();
+                  if(_formKey.currentState.validate()){
+                    User user =User(email: emailControler.value.text,
+                    mob_num: mobileControler.value.text,name: nameControler.value.text,password: passwordControler.value.text,url:imgpath );
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SignIn()));
+                  }
                 },
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15)),
                 color: Colors.blueAccent,
                 child: Text(
-                  "Sign Up",
+                  "Sign Up!",
                   style: TextStyle(color: Colors.white, fontSize: 18.0),
                 ),
               ),
@@ -96,7 +130,9 @@ class _SignUpState extends State<SignUp> {
                         fontWeight: FontWeight.bold,
                         fontSize: 18),
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SignIn()));
+                  },
                 )
               ],
             ),
@@ -110,7 +146,7 @@ class _SignUpState extends State<SignUp> {
   }
 
   field(text, IconData icon, TextEditingController controller, bool obscureText,
-      double height, ErrorText error) {
+      double height, ErrorText error,{fun,key}) {
     return Padding(
         padding: EdgeInsets.symmetric(horizontal: 10),
         child: Column(
@@ -122,6 +158,7 @@ class _SignUpState extends State<SignUp> {
                 borderRadius: BorderRadius.circular(15.0),
               ),
               child: TextFormField(
+                key: key,
                 style: TextStyle(color: Colors.black, fontSize: 18.0),
                 decoration: InputDecoration(
                     border: OutlineInputBorder(
@@ -134,7 +171,7 @@ class _SignUpState extends State<SignUp> {
                 keyboardType: TextInputType.text,
                 obscureText: obscureText,
                 controller: controller,
-                validator: (value) {
+                validator: fun??(value) {
                   if (value == "") {
                     error.error = "Empty Field Required";
                   } else {
@@ -161,9 +198,13 @@ class _SignUpState extends State<SignUp> {
         ));
   }
 
-  Future<String> _pickImage(ImageSource source) async {
+  _pickImage(ImageSource source) async {
     var _picked = await ImagePicker.pickImage(source: source);
-    if (_picked != null) return _picked.path;
+    if (_picked != null){
+      setState(() {
+        imgpath=_picked.path;
+      });
+    } 
   }
 
   _showDialog(context) {
@@ -253,5 +294,14 @@ class User {
         mob_num: register.getString('mobile'),
         password: register.getString('password'),
         url: register.getString('url'));
+  }
+  clearUserData() async {
+    SharedPreferences register = await SharedPreferences.getInstance();
+    register.setString('name', null);
+    register.setString('email', null);
+    register.setString('mobile', null);
+    register.setString('password', null);
+    register.setString('url', null);
+    
   }
 }

@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_application_281/screens/Signup.dart';
+import 'package:flutter_application_281/screens/home.dart';
 
 class SignIn extends StatefulWidget {
   @override
@@ -11,8 +13,9 @@ class _SignInState extends State<SignIn> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController emailControler = TextEditingController();
   TextEditingController passwordControler = TextEditingController();
-  ErrorText errorText1 = ErrorText();
-  ErrorText errorText2 = ErrorText();
+  ErrorText errorText1 = ErrorText(error: "");
+  ErrorText errorText2 = ErrorText(error: "");
+  var fAuth=FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +56,11 @@ class _SignInState extends State<SignIn> {
               height: mHeight / 12,
               child: RaisedButton(
                 onPressed: () {
-                  _formKey.currentState.validate();
+                  if( _formKey.currentState.validate()){
+                    login(emailControler.value.text, passwordControler.value.text);
+
+                  }
+
                 },
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15)),
@@ -76,13 +83,15 @@ class _SignInState extends State<SignIn> {
                 ),
                 GestureDetector(
                   child: Text(
-                    " Sign up ",
+                    " Sign up! ",
                     style: TextStyle(
                         color: Colors.blueAccent,
                         fontWeight: FontWeight.bold,
                         fontSize: 18),
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SignUp()));
+                  },
                 )
               ],
             ),
@@ -146,23 +155,19 @@ class _SignInState extends State<SignIn> {
           ],
         ));
   }
-
-  validateForm() async {
-    if (emailControler.text.isNotEmpty) {;
-      Navigator.push(context, MaterialPageRoute(builder: (_) {
-        return; //NotesList();
-      }));
-    } else {
-      return _scaffoldKey.currentState.showSnackBar(SnackBar(
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-          content: Text(
-            'Some Fields Required',
-            style: TextStyle(fontSize: 20),
-          )));
+  login(String email , String pass) async {
+    try{
+    var userCredintial= await fAuth.signInWithEmailAndPassword(email: email, password: pass);
+    if(userCredintial != null){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyApp()));
+    }}on FirebaseAuthException catch (e){
+      print("$e autherror heeeeereeee");
+    }catch(e){
+      print("$e error heeeeereeee");
     }
   }
-}
+  
+} 
 
 class ErrorText {
   String error = "";
